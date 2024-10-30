@@ -10,13 +10,16 @@ import org.springframework.http.ResponseEntity
 
 @JsonPropertyOrder("isSuccess", "code", "message", "result")
 data class ApiResponse<T>(
-    @JsonProperty("isSuccess") val isSuccess: Boolean,
+    @JsonProperty("isSuccess")
+    val isSuccess: Boolean,
     val httpStatus: HttpStatus,
     val code: String,
     val message: String,
     @JsonInclude(JsonInclude.Include.NON_NULL) val result: T? = null
-) {
+)//data class 주생성자는 속성 선언할 때 자동 생성
+{
     companion object {
+        //코틀린에서 정적 멤버(static) 멤버 사용하기 위한 기능
         fun <T> onSuccess(result: T): ResponseEntity<ApiResponse<T>> {
             return ResponseEntity.ok(
                 ApiResponse(true, HttpStatus.OK, "COMMON200", SuccessStatus._OK.message, result)
