@@ -8,7 +8,6 @@ import com.grepp.somun.member.auth.repository.MemberVerificationRepository
 import com.grepp.somun.member.service.MemberService
 import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
-import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
@@ -24,39 +23,38 @@ import java.util.function.ObjIntConsumer
  * 공연관리자 권한 획득을 위한 이메일 인증
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
-class EmailVerificationServiceImpl : EmailVerificationService {
+class EmailVerificationServiceImpl(
+    private val javaMailSender: JavaMailSender,
+    private val emailVerificationRepository: EmailVerificationRepository,
+    private val memberVerificationRepository: MemberVerificationRepository,
+    private val memberService: MemberService,
+    private val templateEngine: TemplateEngine,
+    @Value("\${mail.username}") private val senderEmail: String
+) : EmailVerificationService {
+
     private val logger = logger()
 
-    private val javaMailSender: JavaMailSender? = null
-    private val emailVerificationRepository: EmailVerificationRepository? = null
-    private val memberVerificationRepository: MemberVerificationRepository? = null
-    private val memberService: MemberService? = null
-    private val templateEngine: TemplateEngine? = null
-
-    @Value("\${mail.username}")
-    private val senderEmail: String? = null
 
     // 보낼 이메일 폼 생성, 이미 DB에 있다면 삭제
     @Transactional
     @Throws(MessagingException::class)
     fun createEmailForm(email: String?): MimeMessage {
         val authCode = createCode()
-        val message: MimeMessage = javaMailSender?.createMimeMessage() ?: throw MessagingException("MimeMessage 생성에 실패했습니다.")
+        val message: MimeMessage = javaMailSender.createMimeMessage()
         message.addRecipients(MimeMessage.RecipientType.TO, email)
         message.subject = "인증번호를 somun페이지에 입력해주세요."
         message.setFrom(senderEmail)
         message.setText(setContext(authCode), "utf-8", "html")
 
         // DB에 인증코드 저장 (기존 인증 정보 삭제 후 새로 생성)
-        emailVerificationRepository?.findByEmail(email)?.ifPresent { existingVerification ->
+        emailVerificationRepository.findByEmail(email)?.ifPresent { existingVerification ->
             emailVerificationRepository.deleteByEmail(email)
             logger.info("이전에 신청한 이메일 인증 정보를 삭제했습니다. {}", email)
         }
         val emailVerification = email?.let { EmailVerificationEntity(it, authCode, 5L) }
         if (emailVerification != null) {
-            emailVerificationRepository?.save(emailVerification)
+            emailVerificationRepository.save(emailVerification)
         }
         return message
     }
@@ -68,13 +66,14 @@ class EmailVerificationServiceImpl : EmailVerificationService {
         val targetStringLength = 6
         val random = Random()
         return random.ints(leftLimit, rightLimit + 1)
-            .filter { i: Int -> (i <= 57 || i >= 65) && (i <= 90) or (i >= 97) }
+            .filter { i: Int -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97) }
             .limit(targetStringLength.toLong())
-            .collect<java.lang.StringBuilder>(
+            .collect<StringBuilder>(
                 { StringBuilder() },
-                ObjIntConsumer<java.lang.StringBuilder> { obj: java.lang.StringBuilder, codePoint: Int ->
+                ObjIntConsumer<StringBuilder> { obj: StringBuilder, codePoint: Int ->
                     obj.appendCodePoint(codePoint)
-                }) { obj: java.lang.StringBuilder, s: java.lang.StringBuilder? -> obj.append(s) }
+                }
+            ) { obj: StringBuilder, s: StringBuilder? -> obj.append(s) }
             .toString()
     }
 
@@ -82,7 +81,7 @@ class EmailVerificationServiceImpl : EmailVerificationService {
     private fun setContext(code: String): String {
         val context = Context()
         context.setVariable("code", code)
-        return templateEngine!!.process("mail", context)
+        return templateEngine.process("mail", context)
     }
 
     /**
@@ -94,7 +93,7 @@ class EmailVerificationServiceImpl : EmailVerificationService {
     @Throws(MessagingException::class)
     override fun sendEmail(toEmail: String?) {
         val emailForm: MimeMessage = createEmailForm(toEmail)
-        javaMailSender?.send(emailForm)
+        javaMailSender.send(emailForm)
     }
 
     /**
@@ -108,27 +107,25 @@ class EmailVerificationServiceImpl : EmailVerificationService {
     @Transactional
     override fun verifyCode(registeredEmail: String?, verificationEmail: String?, code: String?): Boolean {
         val emailVerificationEntity: EmailVerificationEntity =
-            emailVerificationRepository?.findByEmail(verificationEmail)
+            emailVerificationRepository.findByEmail(verificationEmail)
                 ?.orElseThrow { RuntimeException("해당 이메일의 인증시도 데이터가 존재하지않습니다.") }
                 ?: throw RuntimeException("emailVerificationEntity가 null입니다.")
 
-
         // 인증 성공(코드의 유효시간과 인증코드를 확인)
-        if (emailVerificationEntity.isExpired && emailVerificationEntity.verificationCode == code) {
+        if (!emailVerificationEntity.isExpired && emailVerificationEntity.verificationCode == code) {
             // MemberVerification 테이블에 추가
             logger.info("인증코드 성공")
             val memberVerificationEntity = MemberVerificationEntity(
                 verificationEmail = verificationEmail,
                 memberEmail = registeredEmail
             )
-            memberVerificationRepository?.save(memberVerificationEntity)
+            memberVerificationRepository.save(memberVerificationEntity)
 
             // 유저의 권한을 ROLE_PADMIN으로 변경
-            if (registeredEmail != null) {
-                memberService?.changeRoleToPadmin(registeredEmail)
-            } else {
-                throw IllegalArgumentException("등록된 이메일이 유효하지 않습니다.")
-            }
+            registeredEmail?.let {
+                memberService.changeRoleToPadmin(it)
+            } ?: throw IllegalArgumentException("등록된 이메일이 유효하지 않습니다.")
+
             logger.info("유저 권한 변경")
 
             // 기존 EmailVerification 테이블에서 삭제
@@ -144,6 +141,6 @@ class EmailVerificationServiceImpl : EmailVerificationService {
      * @return
      */
     override fun verifyEmailDuplicate(email: String?): Boolean {
-        return memberVerificationRepository?.existsByVerificationEmail(email) ?: false
+        return memberVerificationRepository.existsByVerificationEmail(email)
     }
 }
