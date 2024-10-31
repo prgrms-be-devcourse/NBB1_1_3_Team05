@@ -106,30 +106,27 @@ class EmailVerificationServiceImpl(
      */
     @Transactional
     override fun verifyCode(registeredEmail: String?, verificationEmail: String?, code: String?): Boolean {
-        val emailVerificationEntity: EmailVerificationEntity =
-            emailVerificationRepository.findByEmail(verificationEmail)
-                ?.orElseThrow { RuntimeException("해당 이메일의 인증시도 데이터가 존재하지않습니다.") }
-                ?: throw RuntimeException("emailVerificationEntity가 null입니다.")
+        val emailVerificationEntity = emailVerificationRepository.findByEmail(verificationEmail)
+            .orElseThrow { RuntimeException("해당 이메일의 인증시도 데이터가 존재하지않습니다.") }
 
         // 인증 성공(코드의 유효시간과 인증코드를 확인)
-        if (!emailVerificationEntity.isExpired && emailVerificationEntity.verificationCode == code) {
+        if (emailVerificationEntity.isExpired() && emailVerificationEntity.verificationCode == code) {
             // MemberVerification 테이블에 추가
             logger.info("인증코드 성공")
+
             val memberVerificationEntity = MemberVerificationEntity(
                 verificationEmail = verificationEmail,
                 memberEmail = registeredEmail
             )
+
             memberVerificationRepository.save(memberVerificationEntity)
 
             // 유저의 권한을 ROLE_PADMIN으로 변경
-            registeredEmail?.let {
-                memberService.changeRoleToPadmin(it)
-            } ?: throw IllegalArgumentException("등록된 이메일이 유효하지 않습니다.")
-
+            memberService.changeRoleToPadmin(registeredEmail!!)
             logger.info("유저 권한 변경")
 
             // 기존 EmailVerification 테이블에서 삭제
-            emailVerificationRepository.deleteByEmail(verificationEmail)
+            emailVerificationRepository.deleteByEmail(verificationEmail!!)
             return true
         }
         return false
