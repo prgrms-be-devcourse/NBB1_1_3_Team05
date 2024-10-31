@@ -124,7 +124,11 @@ class EmailVerificationServiceImpl : EmailVerificationService {
             memberVerificationRepository?.save(memberVerificationEntity)
 
             // 유저의 권한을 ROLE_PADMIN으로 변경
-            memberService?.changeRoleToPadmin(registeredEmail)
+            if (registeredEmail != null) {
+                memberService?.changeRoleToPadmin(registeredEmail)
+            } else {
+                throw IllegalArgumentException("등록된 이메일이 유효하지 않습니다.")
+            }
             logger.info("유저 권한 변경")
 
             // 기존 EmailVerification 테이블에서 삭제
