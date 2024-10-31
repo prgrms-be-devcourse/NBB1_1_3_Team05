@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 @org.springframework.stereotype.Repository
 interface RefreshTokenRepository : JpaRepository<RefreshTokenEntity?, Long?> {
-    fun findByMember(member: MemberEntity?): java.util.Optional<RefreshTokenEntity?>?
+    fun findByMember(member: MemberEntity): java.util.Optional<RefreshTokenEntity>
 
     @org.springframework.transaction.annotation.Transactional
-    fun deleteAllByMember(member: MemberEntity?)
+    fun deleteAllByMember(member: MemberEntity)
 }

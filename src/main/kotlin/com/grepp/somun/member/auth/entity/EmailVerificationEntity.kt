@@ -6,17 +6,30 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "email_verification")
 data class EmailVerificationEntity(
-    @field:Column(nullable = false) val email: String,
-    @field:Column(nullable = false) val verificationCode: String,
-    val expirationMinutes: Long?
-) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null
+    val id: Long? = null,
 
-    val createdAt: LocalDateTime = LocalDateTime.now()
-    val expiresAt: LocalDateTime = createdAt.plusMinutes(expirationMinutes ?: 0)
+    @Column(nullable = false)
+    val email: String,
 
-    val isExpired: Boolean
-        get() = LocalDateTime.now().isAfter(expiresAt)
+    @Column(nullable = false)
+    val verificationCode: String,
+
+    @Column(nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @Column(nullable = false)
+    val expiresAt: LocalDateTime
+) {
+    constructor(email: String, verificationCode: String, expirationMinutes: Long) : this(
+        email = email,
+        verificationCode = verificationCode,
+        createdAt = LocalDateTime.now(),
+        expiresAt = LocalDateTime.now().plusMinutes(expirationMinutes)
+    )
+
+    fun isExpired(): Boolean {
+        return !LocalDateTime.now().isAfter(this.expiresAt)
+    }
 }
