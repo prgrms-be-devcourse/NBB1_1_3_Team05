@@ -2,68 +2,52 @@ package com.grepp.somun.member.entity
 
 import com.grepp.somun.global.entity.BaseEntity
 import com.grepp.somun.member.auth.entity.MemberVerificationEntity
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import lombok.AllArgsConstructor
-import lombok.NoArgsConstructor
-import lombok.experimental.SuperBuilder
+import jakarta.persistence.*
 
-@jakarta.persistence.Entity
-@lombok.Getter
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@jakarta.persistence.Table(name = "member")
-class MemberEntity : BaseEntity() {
-    @jakarta.persistence.Id
+@Entity
+@Table(name = "member")
+class MemberEntity(
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @jakarta.persistence.Column(name = "member_id")
-    private var memberId: Long? = null
+    @Column(name = "member_id")
+    val memberId: Long? = null,
 
-    @jakarta.persistence.Column(name = "email", unique = true, nullable = false)
-    private var email: String? = null
+    @Column(name = "email", unique = true, nullable = false)
+    var email: String,
 
-    @jakarta.persistence.Column(name = "password")
-    private var password: String? = null
+    @Column(name = "password")
+    var password: String? = null,
 
-    @Enumerated(jakarta.persistence.EnumType.STRING)
-    @jakarta.persistence.Column(name = "provider", nullable = false)
-    private var provider: SocialProvider? = null
+    @Enumerated(EnumType.STRING)
+    @Column(name = "provider", nullable = false)
+    var provider: SocialProvider,
 
-    @jakarta.persistence.Column(name = "provider_id")
-    private var providerId: String? = null
+    @Column(name = "provider_id")
+    var providerId: String? = null,
 
-    @jakarta.persistence.Column(name = "name", unique = true, nullable = false)
-    private var name: String? = null
+    @Column(name = "name", unique = true, nullable = false)
+    var name: String,
 
-    @jakarta.persistence.Column(name = "first_login", nullable = false)
-    private var isFirstLogin = true
+    @Column(name = "first_login", nullable = false)
+    var isFirstLogin: Boolean = true,
 
-    @Enumerated(jakarta.persistence.EnumType.STRING)
-    @jakarta.persistence.Column(name = "role", nullable = false)
-    private var role: MemberRole? = null
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    var role: MemberRole = MemberRole.ROLE_USER,
 
-    @lombok.Builder.Default
-    @jakarta.persistence.OneToMany(
-        mappedBy = "member",
-        cascade = [jakarta.persistence.CascadeType.ALL],
-        orphanRemoval = true
-    )
-    private val memberCategoryList: List<MemberCategoryEntity> = java.util.ArrayList<MemberCategoryEntity>()
+    @OneToMany(mappedBy = "member", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val memberCategoryList: List<MemberCategoryEntity> = mutableListOf(),
 
-    @jakarta.persistence.OneToOne(
-        mappedBy = "member",
-        cascade = [jakarta.persistence.CascadeType.ALL],
-        orphanRemoval = true
-    )
-    private val memberVerification: MemberVerificationEntity? = null
+    @OneToOne(mappedBy = "member", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val memberVerification: MemberVerificationEntity? = null
+) : BaseEntity() {
 
-    fun changeName(newName: String?) {
+    fun changeName(newName: String) {
         this.name = newName
     }
 
-    fun changeRole(newRole: MemberRole?) {
+    fun changeRole(newRole: MemberRole) {
         this.role = newRole
     }
 
