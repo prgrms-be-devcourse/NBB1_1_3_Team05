@@ -43,8 +43,10 @@ class AuthController {
     fun authorize(@RequestBody loginDTO: LoginDTO): ResponseEntity<TokenResponseDTO> {
         val authenticationToken = UsernamePasswordAuthenticationToken(loginDTO.email, loginDTO.password)
 
-        val memberEntity = memberRepository?.findByEmail(loginDTO.email)?.orElseThrow {
-            RuntimeException("사용자가 존재하지 않습니다.")
+        val memberEntity = loginDTO.email?.let {
+            memberRepository?.findByEmail(it)?.orElseThrow {
+                RuntimeException("사용자가 존재하지 않습니다.")
+            }
         } ?: throw RuntimeException("MemberRepository가 null입니다.")
 
         val authentication: Authentication = authenticationManagerBuilder?.getObject()?.authenticate(authenticationToken)

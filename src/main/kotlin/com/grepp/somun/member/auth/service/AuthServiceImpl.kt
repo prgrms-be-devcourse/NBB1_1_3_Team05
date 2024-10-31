@@ -37,7 +37,7 @@ class AuthServiceImpl : AuthService {
      */
     override fun validateRefreshToken(refreshToken: String?): Boolean {
         val email: String? = refreshToken?.let { jwtTokenProvider?.getMemberEmailFromToken(it) }
-        val member: MemberEntity = memberRepository?.findByEmail(email)?.orElse(null) ?: return false
+        val member: MemberEntity = email?.let { memberRepository?.findByEmail(it)?.orElse(null) } ?: return false
         val storedRefreshToken: RefreshTokenEntity =
             refreshTokenRepository?.findByMember(member)?.orElse(null) ?: return false
 
@@ -67,8 +67,10 @@ class AuthServiceImpl : AuthService {
      */
     override fun insertRefreshToken(refreshToken: String?) {
         val email: String? = refreshToken?.let { jwtTokenProvider?.getMemberEmailFromToken(it) }
-        val member: MemberEntity? = memberRepository?.findByEmail(email)
-            ?.orElseThrow { GeneralException(ErrorStatus.MEMBER_NOT_FOUND) }
+        val member: MemberEntity? = email?.let {
+            memberRepository?.findByEmail(it)
+                ?.orElseThrow { GeneralException(ErrorStatus.MEMBER_NOT_FOUND) }
+        }
 
         //member에 해당하는 리프레시 토큰 삭제
         refreshTokenRepository?.deleteAllByMember(member)
@@ -87,8 +89,10 @@ class AuthServiceImpl : AuthService {
      * @return
      */
     override fun createTokenResponseForSocialMember(email: String?): TokenResponseDTO? {
-        val memberEntity: MemberEntity = memberRepository?.findByEmail(email)
-            ?.orElseThrow { RuntimeException("사용자가 존재하지 않습니다.") }
+        val memberEntity: MemberEntity = email?.let {
+            memberRepository?.findByEmail(it)
+                ?.orElseThrow { RuntimeException("사용자가 존재하지 않습니다.") }
+        }
             ?: throw RuntimeException("memberEntity가 null입니다.")
         val userDetails: UserDetails? = email?.let { customUserDetailsService!!.loadUserByUsername(it) }
         val authentication = PreAuthenticatedAuthenticationToken(
