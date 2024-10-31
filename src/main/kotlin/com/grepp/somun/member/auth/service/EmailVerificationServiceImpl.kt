@@ -35,7 +35,7 @@ class EmailVerificationServiceImpl : EmailVerificationService {
     private val memberService: MemberService? = null
     private val templateEngine: TemplateEngine? = null
 
-    @Value("\${spring.mail.username}")
+    @Value("\${mail.username}")
     private val senderEmail: String? = null
 
     // 보낼 이메일 폼 생성, 이미 DB에 있다면 삭제

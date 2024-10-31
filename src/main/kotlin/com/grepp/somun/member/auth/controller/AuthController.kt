@@ -26,14 +26,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
-class AuthController {
-    private val jwtTokenProvider: JwtTokenProvider? = null
-    private val authenticationManagerBuilder: AuthenticationManagerBuilder? = null
-    private val authService: AuthService? = null
-    private val memberRepository: MemberRepository? = null
-
+class AuthController(
+    private val jwtTokenProvider: JwtTokenProvider,
+    private val authenticationManagerBuilder: AuthenticationManagerBuilder,
+    private val authService: AuthService,
+    private val memberRepository: MemberRepository
+) {
     /**
      * 로컬 로그인
      * @param loginDTO
@@ -43,24 +42,21 @@ class AuthController {
     fun authorize(@RequestBody loginDTO: LoginDTO): ResponseEntity<TokenResponseDTO> {
         val authenticationToken = UsernamePasswordAuthenticationToken(loginDTO.email, loginDTO.password)
 
-        val memberEntity = loginDTO.email?.let {
-            memberRepository?.findByEmail(it)?.orElseThrow {
-                RuntimeException("사용자가 존재하지 않습니다.")
-            }
-        } ?: throw RuntimeException("MemberRepository가 null입니다.")
+        val memberEntity = memberRepository.findByEmail(loginDTO.email)
+            .orElseThrow { RuntimeException("사용자가 존재하지 않습니다.") }
 
-        val authentication: Authentication = authenticationManagerBuilder?.getObject()?.authenticate(authenticationToken)
+        val authentication: Authentication = authenticationManagerBuilder.getObject()?.authenticate(authenticationToken)
             ?: throw RuntimeException("인증 관리자 객체를 가져오는 데 실패했습니다.")
 
         SecurityContextHolder.getContext().authentication = authentication
 
-        val accessToken = jwtTokenProvider?.createAccessToken(authentication)
+        val accessToken = jwtTokenProvider.createAccessToken(authentication)
 
         val email = authentication.name
 
-        val refreshToken = jwtTokenProvider?.createRefreshToken(email)
+        val refreshToken = jwtTokenProvider.createRefreshToken(email)
 
-        authService?.insertRefreshToken(refreshToken)
+        authService.insertRefreshToken(refreshToken)
 
         val httpHeaders = HttpHeaders()
         httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer $accessToken")
@@ -87,11 +83,13 @@ class AuthController {
      */
     @PostMapping("/validate")
     fun validateRefreshToken(@RequestBody tokenRequestDTO: TokenRequestDTO): ResponseEntity<ApiResponse<TokenResponseDTO>> {
-        val refreshToken: String? = tokenRequestDTO.refreshToken
-        if (!authService?.validateRefreshToken(refreshToken)!!) { //리프레시 토큰 유효하지 않을 때
+        val refreshToken: String = tokenRequestDTO.refreshToken ?: throw GeneralException(ErrorStatus.INVALID_REFRESH_TOKEN)
+
+        if (!authService.validateRefreshToken(refreshToken)) { // 리프레시 토큰 유효하지 않을 때
             throw GeneralException(ErrorStatus.INVALID_REFRESH_TOKEN)
         }
-        val newAccessToken: String? = authService.createNewAccessToken(refreshToken)
+
+        val newAccessToken: String = authService.createNewAccessToken(refreshToken)
         val result = TokenResponseDTO(newAccessToken, refreshToken)
         return ApiResponse.onSuccess(HttpStatus.CREATED, "COMMON200", SuccessStatus._CREATED.message, result)
     }

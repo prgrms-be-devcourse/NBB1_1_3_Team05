@@ -9,8 +9,7 @@ import com.grepp.somun.member.auth.service.EmailVerificationService
 import com.grepp.somun.member.validator.EmailValidator
 import jakarta.mail.MessagingException
 import jakarta.servlet.http.HttpSession
-import lombok.RequiredArgsConstructor
-import lombok.extern.slf4j.Slf4j
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -20,12 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@Slf4j
-@RequiredArgsConstructor
 @RequestMapping("/api/v1/emails")
-class EmailVerificationController {
-    private val emailVerificationService: EmailVerificationService? = null
-    private val emailValidator: EmailValidator? = null
+class EmailVerificationController(
+    private val emailVerificationService: EmailVerificationService,
+    private val emailValidator: EmailValidator
+) {
+    private val log = LoggerFactory.getLogger(EmailVerificationController::class.java)
 
     /**
      * 입력한 이메일로 인증코드를 요청
@@ -39,20 +38,20 @@ class EmailVerificationController {
     fun getVerifyCode(
         @RequestBody emailRequestDto: EmailRequestDto, session: HttpSession
     ): ResponseEntity<ApiResponse<Void>> {
-        val email: String = emailRequestDto.email
+        val email = emailRequestDto.email
 
         // 이메일 형식 검증
-        if (!emailValidator?.isValidEmail(email)!!) {
+        if (!emailValidator.isValidEmail(email)) {
             throw GeneralException(ErrorStatus.EMAIL_INVALID)
         }
 
         // 이미 인증에 사용된 이메일인지 확인
-        if (emailVerificationService?.verifyEmailDuplicate(email) == true) {
+        if (emailVerificationService.verifyEmailDuplicate(email)) {
             throw GeneralException(ErrorStatus.VERIFICATION_EMAIL_DUPLICATE)
         }
         session.setAttribute("verifyEmail", email)
         session.maxInactiveInterval = 600 // 세션 10분간 유지
-        emailVerificationService?.sendEmail(email)
+        emailVerificationService.sendEmail(email)
         return ApiResponse.onSuccess()
     }
 
@@ -69,13 +68,13 @@ class EmailVerificationController {
         @AuthenticationPrincipal userDetails: UserDetails,
         session: HttpSession
     ): ResponseEntity<ApiResponse<Void>> {
-        val code: String = codeRequestDto.code
+        val code = codeRequestDto.code
         if (session.getAttribute("verifyEmail") == null || userDetails.username == null) {
             throw GeneralException(ErrorStatus._BAD_REQUEST)
         }
-        if (emailVerificationService?.verifyCode(
+        if (emailVerificationService.verifyCode(
                 userDetails.username, session.getAttribute("verifyEmail") as String, code
-            ) == true
+            )
         ) {
             session.invalidate()
             return ApiResponse.onSuccess()
