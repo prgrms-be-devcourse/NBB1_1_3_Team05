@@ -9,7 +9,6 @@ import org.hibernate.annotations.BatchSize
 
 @Entity
 @Table(name = "comment")
-@jakarta.persistence.EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener::class)
 open class CommentEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,13 +22,13 @@ open class CommentEntity(
     @Column(name = "status", nullable = true)
     var commentStatus: CommentStatus = CommentStatus.ACTIVE, // 기본값 설정
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "performance_id", nullable = false)
-//    val performance: PerformanceEntity,
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "member_id", nullable = false)
-//    val member: MemberEntity,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "performance_id", nullable = false)
+    val performance: PerformanceEntity,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    val member: MemberEntity,
 
     @OneToMany(mappedBy = "parentComment")
     @BatchSize(size = 10)
