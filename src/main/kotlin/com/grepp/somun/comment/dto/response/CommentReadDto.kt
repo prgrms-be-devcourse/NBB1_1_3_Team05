@@ -1,29 +1,20 @@
 package com.grepp.somun.comment.dto.response
 
 import com.grepp.somun.comment.entity.CommentStatus
-import lombok.Builder
-import lombok.Getter
-
 import java.time.LocalDateTime
 
-/*
-* 댓글 전체 조회
-* */
-@Getter
-@Builder
-class CommentReadDto {
-    private val commentId: Long = 0
-    private val memberId: Long = 0
-    private val memberName: String? = null // 댓글에 사용자 이름을 표시하려면 name도 넘겨줘야하더라구요
-    private val email: String? = null
-    private val content: String? = null //엔티티 상에서는 comment
-    private val createdAt: LocalDateTime? = null
-    private val updatedAt: LocalDateTime? = null
-    private val parentId: Long? = null
-    private val commentStatus: CommentStatus? = null
-
-    // 대댓글 리스트 추가
-    @Builder.Default
-    private val replies: List<CommentReadDto> = ArrayList()
-} //이건 추후에 record로 바꾸겠슴다.
-
+/**
+ * 댓글 전체 조회 DTO
+ */
+data class CommentReadDto(
+    val commentId: Long,
+    val memberId: Long,
+    val memberName: String?, // 댓글에 사용자 이름 표시
+    val email: String?,
+    val content: String?, // 엔티티 상에서는 comment
+    val createdAt: LocalDateTime?,
+    val updatedAt: LocalDateTime?,
+    val parentId: Long?,
+    val commentStatus: CommentStatus?,
+    val replies: List<CommentReadDto> = emptyList() // 기본값으로 빈 리스트 설정
+)

@@ -2,6 +2,14 @@ package com.grepp.somun.comment.controller
 
 
 
+import com.grepp.somun.comment.dto.request.CommentCreateRequest
+import com.grepp.somun.comment.dto.request.CommentUpdateRequest
+import com.grepp.somun.comment.dto.response.CommentCreateResponse
+import com.grepp.somun.comment.dto.response.CommentDeleteResponse
+import com.grepp.somun.comment.dto.response.CommentReadDto
+import com.grepp.somun.comment.dto.response.CommentUpdateResponse
+import com.grepp.somun.comment.service.CommentService
+import com.grepp.somun.global.apiResponse.ApiResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

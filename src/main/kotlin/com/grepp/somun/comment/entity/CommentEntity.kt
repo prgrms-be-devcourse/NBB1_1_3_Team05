@@ -13,7 +13,7 @@ open class CommentEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    val commentId: Long? = null, // id값은 원시형이 아닌 nullable wrapper 사용
+    val commentId: Long, // id값은 원시형이 아닌 nullable wrapper 사용
 
     @Column(name = "comment", unique = true, nullable = false)
     var content: String,
