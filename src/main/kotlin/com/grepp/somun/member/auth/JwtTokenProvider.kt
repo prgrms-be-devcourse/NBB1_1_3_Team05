@@ -2,6 +2,7 @@ package com.grepp.somun.member.auth
 
 import com.grepp.somun.config.logger
 import com.grepp.somun.member.auth.service.CustomUserDetailsService
+import com.grepp.somun.member.repository.MemberRepository
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
@@ -35,23 +36,14 @@ class JwtTokenProvider(
     @param:Value("\${jwt.access.token.expiration}") private val accessTokenValidity: Long,
     // 리프레시 토큰 유효 시간
     @param:Value("\${jwt.refresh.token.expiration}") private val refreshTokenValidity: Long,
-    customUserDetailsService: CustomUserDetailsService,
-    memberRepository: MemberRepository
-) {
-    private val key // JWT 서명에 사용할 키
-            : Key
-    private val customUserDetailsService: CustomUserDetailsService
+    private val customUserDetailsService: CustomUserDetailsService,
     private val memberRepository: MemberRepository
+) {
+    private val key: Key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)) // JWT 서명에 사용할 키
+    private val logger = logger() // 로거 인스턴스
 
-    private val logger = logger()
-
-    // 생성자에서 초기화
     init {
-        this.customUserDetailsService = customUserDetailsService
-        val keyBytes: ByteArray = Decoders.BASE64.decode(secretKey)
-        key = Keys.hmacShaKeyFor(keyBytes)
         logger.info("JWT TokenProvider 초기화 완료")
-        this.memberRepository = memberRepository
     }
 
     // 액세스 토큰 생성(role 권한 부여 설정)
