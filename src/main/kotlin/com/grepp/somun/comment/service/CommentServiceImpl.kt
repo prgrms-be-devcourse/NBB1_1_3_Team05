@@ -14,6 +14,7 @@ import com.grepp.somun.comment.entity.CommentStatus
 import com.grepp.somun.comment.repository.CommentRepository
 import com.grepp.somun.global.apiResponse.exception.ErrorStatus
 import com.grepp.somun.global.apiResponse.exception.GeneralException
+import com.grepp.somun.member.repository.MemberRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
