@@ -23,7 +23,7 @@ class CouponEntity(
     @JoinColumn(name = "member_id")
     var member: MemberEntity? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
     @JoinColumn(name = "performance_id")
     val performance: PerformanceEntity? = null,
 
