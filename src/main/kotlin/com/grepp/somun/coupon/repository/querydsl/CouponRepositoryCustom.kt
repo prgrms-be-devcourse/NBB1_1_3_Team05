@@ -11,5 +11,5 @@ import java.util.*
 interface CouponRepositoryCustom {
     fun getAllCouponsByMemberEmail(email: String, performanceId: Long?): List<CouponEntity>
     fun getFirstComeCouponByPerformanceId(performanceId: Long?): Optional<CouponEntity>
-    fun getCouponByPerformanceIdAndMemberId(performanceId: Long?, memberId: Long): Optional<CouponEntity>
+    fun getCouponByPerformanceIdAndMemberId(performanceId: Long?, memberId: Long?): Optional<CouponEntity>
 }
