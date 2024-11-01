@@ -1,30 +1,24 @@
 package com.grepp.somun.member.auth.entity
 
 import com.grepp.somun.member.entity.MemberEntity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.JoinColumn
-import lombok.AllArgsConstructor
-import lombok.NoArgsConstructor
+import jakarta.persistence.*
 
-@jakarta.persistence.Entity
-@lombok.Getter
-@NoArgsConstructor
-@lombok.Builder
-@AllArgsConstructor
-@jakarta.persistence.Table(name = "member_verification")
-class MemberVerificationEntity {
-    @jakarta.persistence.Id
+@Entity
+@Table(name = "member_verification")
+class MemberVerificationEntity(
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
+    val id: Long? = null,
 
-    @jakarta.persistence.Column(name = "member_email", nullable = false)
-    private var memberEmail: String? = null
+    @Column(name = "member_email", nullable = false)
+    var memberEmail: String,
 
-    @jakarta.persistence.Column(name = "verification_email", nullable = false, unique = true)
-    private var verificationEmail: String? = null
+    @Column(name = "verification_email", nullable = false, unique = true)
+    var verificationEmail: String,
 
-    @jakarta.persistence.OneToOne
+    @OneToOne
     @JoinColumn(name = "member_email", referencedColumnName = "email", insertable = false, updatable = false)
-    private val member: MemberEntity? = null
+    val member: MemberEntity? = null
+) {
 }

@@ -14,7 +14,7 @@ import com.grepp.somun.member.entity.SocialProvider
 import com.grepp.somun.member.oauth.common.dto.SocialMemberCheckDto
 import com.grepp.somun.member.repository.MemberCategoryRepository
 import com.grepp.somun.member.repository.MemberRepository
-import com.grepp.somun.performance.repository.querydsl.CategoryRepository
+import com.grepp.somun.performance.repository.CategoryRepository
 import jakarta.servlet.http.HttpSession
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service

@@ -2,106 +2,81 @@ package com.grepp.somun.performance.entity
 
 import com.grepp.somun.global.entity.BaseEntity
 import com.grepp.somun.member.entity.MemberEntity
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.JoinColumn
-import lombok.AccessLevel
-import lombok.NoArgsConstructor
-import lombok.experimental.SuperBuilder
+import jakarta.persistence.*
+import java.time.LocalDateTime
 
-@jakarta.persistence.Entity(name = "performance")
-@lombok.Getter
-@SuperBuilder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-class PerformanceEntity : BaseEntity() {
-    @jakarta.persistence.Id
+@Entity(name = "performance")
+class PerformanceEntity(
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @jakarta.persistence.Column(name = "performance_id")
-    private var performanceId: Long? = null
+    @Column(name = "performance_id")
+    var performanceId: Long? = null,
 
-    @jakarta.persistence.ManyToOne
+    @ManyToOne
     @JoinColumn(name = "member_id")
-    private var member: MemberEntity? = null
+    var member: MemberEntity? = null,
 
-    @jakarta.persistence.Column(name = "title", nullable = false, length = 50)
-    private var title: String? = null
+    @Column(name = "title", nullable = false, length = 50)
+    var title: String? = null,
 
-    @jakarta.persistence.Column(name = "date_start_time")
-    private var dateStartTime: java.time.LocalDateTime? = null
+    @Column(name = "date_start_time")
+    var dateStartTime: LocalDateTime? = null,
 
-    @jakarta.persistence.Column(name = "date_end_time")
-    private var dateEndTime: java.time.LocalDateTime? = null
+    @Column(name = "date_end_time")
+    var dateEndTime: LocalDateTime? = null,
 
-    @jakarta.persistence.Column(name = "description")
-    private var description: String? = null
+    @Column(name = "description")
+    var description: String? = null,
 
-    @jakarta.persistence.Column(name = "max_audience")
-    private var maxAudience: Int? = null
+    @Column(name = "max_audience")
+    var maxAudience: Int? = null,
 
-    @jakarta.persistence.Column(name = "address")
-    private var address: String? = null
+    @Column(name = "address")
+    var address: String? = null,
 
-    @jakarta.persistence.Column(name = "image_url")
-    private var imageUrl: String? = null
+    @Column(name = "image_url")
+    var imageUrl: String? = null,
 
-    @jakarta.persistence.Column(name = "price")
-    private var price: Int? = null
+    @Column(name = "price")
+    var price: Int? = null,
 
-    @jakarta.persistence.Column(name = "remaining_tickets")
-    private var remainingTickets = 0
+    @Column(name = "start_date")
+    var startDate: LocalDateTime? = null,
 
-    @jakarta.persistence.Column(name = "start_date")
-    private var startDate: java.time.LocalDateTime? = null
 
-    @jakarta.persistence.Column(name = "status")
-    @Enumerated(jakarta.persistence.EnumType.STRING)
-    private var performanceStatus: PerformanceStatus? = null
+    @Column(name = "remaining_tickets")
+    var remainingTickets: Int = 0,
 
-    @jakarta.persistence.OneToMany(
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    var performanceStatus: PerformanceStatus? = null,
+
+    @OneToMany(
         mappedBy = "performance",
-        cascade = [jakarta.persistence.CascadeType.ALL],
+        cascade = [CascadeType.ALL],
         orphanRemoval = true
     )
-    @lombok.Builder.Default
-    private val performanceCategoryList: List<PerformanceCategoryEntity> = java.util.ArrayList()
+    var performanceCategoryList: MutableList<PerformanceCategoryEntity> = mutableListOf()
+) : BaseEntity() {
 
-    fun updatePerformance(performanceEntity: PerformanceEntity) {
-        if (performanceEntity.title != null) {
-            this.title = performanceEntity.title
-        }
-        if (performanceEntity.dateStartTime != null) {
-            this.dateStartTime = performanceEntity.dateStartTime
-        }
-        if (performanceEntity.dateEndTime != null) {
-            this.dateEndTime = performanceEntity.dateEndTime
-        }
-        if (performanceEntity.description != null) {
-            this.description = performanceEntity.description
-        }
-        if (performanceEntity.address != null) {
-            this.address = performanceEntity.address
-        }
-        if (performanceEntity.imageUrl != null) {
-            this.imageUrl = performanceEntity.imageUrl
-        }
-        if (performanceEntity.price != null) {
-            this.price = performanceEntity.price
-        }
-        if (performanceEntity.maxAudience != null) {
-            this.maxAudience = performanceEntity.maxAudience
-        }
-        if (performanceEntity.performanceStatus != null) {
-            this.performanceStatus = performanceEntity.performanceStatus
-        }
+    fun updatePerformance(update: PerformanceEntity) {
+        update.title?.let { this.title = it }
+        update.dateStartTime?.let { this.dateStartTime = it }
+        update.dateEndTime?.let { this.dateEndTime = it }
+        update.description?.let { this.description = it }
+        update.address?.let { this.address = it }
+        update.imageUrl?.let { this.imageUrl = it }
+        update.price?.let { this.price = it }
+        update.maxAudience?.let { this.maxAudience = it }
+        update.performanceStatus?.let { this.performanceStatus = it }
     }
 
-    fun updateMember(memberEntity: MemberEntity?) {
-        this.member = memberEntity
+    fun updateMember(member: MemberEntity?) {
+        this.member = member
     }
 
     fun updateDeleteAt() {
-        this.recordDeletedAt(java.time.LocalDateTime.now())
+        recordDeletedAt(LocalDateTime.now())
     }
 
     fun updateImageUrl(imageUrl: String?) {
