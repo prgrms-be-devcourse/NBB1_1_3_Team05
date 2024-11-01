@@ -3,7 +3,6 @@ package com.grepp.somun.member.auth.service
 import com.grepp.somun.member.entity.MemberEntity
 import com.grepp.somun.member.entity.SocialProvider
 import com.grepp.somun.member.repository.MemberRepository
-import lombok.RequiredArgsConstructor
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
@@ -13,15 +12,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 
 @Component
-@RequiredArgsConstructor
-class CustomUserDetailsService : UserDetailsService {
-    private val memberRepository: MemberRepository? = null
+class CustomUserDetailsService(
+    private val memberRepository: MemberRepository
+) : UserDetailsService {
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(email: String): UserDetails {
-        val member: MemberEntity = memberRepository?.findByEmail(email)
-            ?.orElseThrow { UsernameNotFoundException("User not found: $email") }
-            ?: throw RuntimeException("member가 null입니다.")
+        val member: MemberEntity = memberRepository.findByEmail(email)
+            .orElseThrow { UsernameNotFoundException("User not found: $email") }
 
         // 소셜 로그인 사용자인지 확인
         val isSocialLogin = member.provider !== SocialProvider.LOCAL

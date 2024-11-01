@@ -1,6 +1,8 @@
 package com.grepp.somun.member.auth
 
 import com.grepp.somun.config.logger
+import com.grepp.somun.global.apiResponse.exception.ErrorStatus
+import com.grepp.somun.global.apiResponse.exception.GeneralException
 import com.grepp.somun.member.auth.service.CustomUserDetailsService
 import com.grepp.somun.member.repository.MemberRepository
 import io.jsonwebtoken.Claims
@@ -47,7 +49,10 @@ class JwtTokenProvider(
     }
 
     // 액세스 토큰 생성(role 권한 부여 설정)
-    fun createAccessToken(authentication: Authentication): String {
+    fun createAccessToken(authentication: Authentication?): String {
+        if (authentication == null) {
+            throw IllegalArgumentException("Authentication 객체가 null입니다.") // null 체크 추가
+        }
         val principal = authentication.principal
 
         // UserDetails에서 권한 정보 가져오기
@@ -98,21 +103,21 @@ class JwtTokenProvider(
     }
 
     // 토큰으로 사용자 이메일 가져오기
-    fun getMemberEmailFromToken(token: String): String? {
+    fun getMemberEmailFromToken(token: String): String {
         return try {
             val claims: Claims = getClaims(token)
             claims.subject // 이메일은 subject로 설정
         } catch (e: JwtException) {
             logger.info("유효하지 않은 JWT 토큰입니다.")
-            null
+            throw GeneralException(ErrorStatus.INVALID_TOKEN)
         } catch (e: IllegalArgumentException) {
             logger.info("유효하지 않은 JWT 토큰입니다.")
-            null
+            throw GeneralException(ErrorStatus.INVALID_TOKEN)
         }
     }
 
     //토큰에서 만료시간 가져오기
-    fun getExpiryDate(token: String): LocalDateTime? {
+    fun getExpiryDate(token: String): LocalDateTime {
         return try {
             val claims: Claims = getClaims(token)
             claims
@@ -122,10 +127,10 @@ class JwtTokenProvider(
                 .toLocalDateTime()
         } catch (e: JwtException) {
             logger.info("유효하지 않은 JWT 토큰입니다.")
-            null
+            throw GeneralException(ErrorStatus.INVALID_TOKEN)
         } catch (e: IllegalArgumentException) {
             logger.info("유효하지 않은 JWT 토큰입니다.")
-            null
+            throw GeneralException(ErrorStatus.INVALID_TOKEN)
         }
     }
 
