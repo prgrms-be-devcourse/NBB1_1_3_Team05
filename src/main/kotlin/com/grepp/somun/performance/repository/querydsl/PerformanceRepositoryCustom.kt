@@ -20,7 +20,7 @@ interface PerformanceRepositoryCustom {
     // 실시간 인기 공연 조회
     fun getPerformancesByIds(performanceIds: List<Long>): List<PerformanceWithCategory>
 
-    fun getPerformanceDetail(performanceId: Long): Optional<PerformanceDetail>
+    fun getPerformanceDetail(performanceId: Long): PerformanceDetail?
 
     fun getMyPerformanceWithCategoryList(email: String, pageable: Pageable): Page<PerformanceWithCategory>
 }

@@ -68,14 +68,14 @@ class PerformanceServiceImpl(
     }
 
     override fun getPerformanceDetail(email: String, performanceId: Long): PerformanceDetailResponse {
+        val performanceDetail = performanceRepository.getPerformanceDetail(performanceId)
+
         return if (isAccessPerformance(email, performanceId)) {
-            performanceRepository.getPerformanceDetail(performanceId)
-                .map { PerformanceDetailResponse.from(true, it) }
-                .orElseThrow { GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND) }
+            performanceDetail?.let { PerformanceDetailResponse.from(true, it) }
+                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
         } else {
-            performanceRepository.getPerformanceDetail(performanceId)
-                .map { PerformanceDetailResponse.from(false, it) }
-                .orElseThrow { GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND) }
+            performanceDetail?.let { PerformanceDetailResponse.from(false, it) }
+                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
         }
     }
 

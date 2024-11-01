@@ -4,17 +4,20 @@ import com.grepp.somun.performance.dto.domain.CategoryContent
 import com.grepp.somun.performance.dto.domain.PerformanceDetail
 import com.grepp.somun.performance.dto.domain.PerformanceWithCategory
 import com.grepp.somun.performance.entity.PerformanceStatus
-//import com.grepp.somun.performance.entity.QPerformanceEntity
-//import com.grepp.somun.performance.entity.QPerformanceCategoryEntity
-//import com.grepp.somun.performance.entity.QCategoryEntity
-//import com.grepp.somun.member.entity.QMemberEntity
-//import com.grepp.somun.member.entity.QMemberCategoryEntity
+import com.grepp.somun.performance.entity.QPerformanceEntity
+import com.grepp.somun.performance.entity.QPerformanceCategoryEntity
+import com.grepp.somun.performance.entity.QCategoryEntity
+import com.grepp.somun.member.entity.QMemberEntity
+import com.grepp.somun.member.entity.QMemberCategoryEntity
 
 import com.querydsl.core.BooleanBuilder
+import com.querydsl.core.Tuple
 import com.querydsl.core.types.Projections
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 
 
 class PerformanceRepositoryCustomImpl(
@@ -54,7 +57,7 @@ class PerformanceRepositoryCustomImpl(
         nullSafeBuilder { qMember.email.eq(memberEmail) }
     }
 
-    private fun categoryIdEq(categoryId: Long) = nullSafeBuilder {
+    private fun categoryIdEq(categoryId: Long?) = nullSafeBuilder {
         qPerformanceCategoryEntity.category.categoryId.eq(categoryId)
     }
 
@@ -64,7 +67,7 @@ class PerformanceRepositoryCustomImpl(
         BooleanBuilder(qPerformanceEntity.title.contains(search))
     }
 
-    private fun categoryListWhereClause(categoryId: Long, search: String?, email: String?): BooleanBuilder {
+    private fun categoryListWhereClause(categoryId: Long?, search: String?, email: String?): BooleanBuilder {
         val confirmedCondition = BooleanBuilder()
             .and(categoryIdEq(categoryId))
             .and(performanceTitleLike(search))
@@ -81,9 +84,9 @@ class PerformanceRepositoryCustomImpl(
 
     override fun getPerformanceWithCategoryList(
         pageable: Pageable,
-        categoryId: Long,
-        search: String,
-        email: String
+        categoryId: Long?,
+        search: String?,
+        email: String?
     ): Page<PerformanceWithCategory> {
         val performances = jpaQueryFactory.selectDistinct(
             Projections.constructor(
@@ -238,7 +241,7 @@ class PerformanceRepositoryCustomImpl(
     }
 
 
-    override fun getPerformanceDetail(performanceId: Long): Optional<PerformanceDetail> {
+    override fun getPerformanceDetail(performanceId: Long): PerformanceDetail? {
         val performanceDetail = jpaQueryFactory.select(
             Projections.constructor(
                 PerformanceDetail::class.java,
@@ -269,7 +272,7 @@ class PerformanceRepositoryCustomImpl(
             performanceDetail.updateCategories(categories)
         }
 
-        return Optional.ofNullable(performanceDetail)
+        return performanceDetail
     }
 
 
