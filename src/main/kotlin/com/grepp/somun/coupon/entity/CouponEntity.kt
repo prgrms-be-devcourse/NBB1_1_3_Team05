@@ -40,9 +40,9 @@ class CouponEntity(
     var expireTime: LocalDateTime? = null
 ) : BaseEntity() {
 
-    fun setUsed(used: Boolean) {
-        isUsed = used
-    }
+//    fun setUsed(used: Boolean) {
+//        isUsed = used
+//    }
 
     fun updateMemberAndExpiration(member: MemberEntity?, expireAfterDays: Long = 3) {
         this.member = member
