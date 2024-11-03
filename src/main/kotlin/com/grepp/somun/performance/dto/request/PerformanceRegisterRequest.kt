@@ -9,11 +9,11 @@ data class PerformanceRegisterRequest(
     val dateStartTime: LocalDateTime,
     val dateEndTime: LocalDateTime,
     val address: String,
-    val imageUrl: String,
+    val imageUrl: String? = null,
     val price: Int,
     val description: String,
     val maxAudience: Int,
-    val startDate: LocalDateTime,
+    val startDate: LocalDateTime? = dateStartTime,
     val categories: List<Long>
 ) {
     fun toEntity(): PerformanceEntity {
