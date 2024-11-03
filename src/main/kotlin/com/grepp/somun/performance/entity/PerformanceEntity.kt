@@ -17,35 +17,35 @@ class PerformanceEntity(
     var member: MemberEntity? = null,
 
     @Column(name = "title", nullable = false, length = 50)
-    var title: String? = null,
+    var title: String,
 
-    @Column(name = "date_start_time")
-    var dateStartTime: LocalDateTime? = null,
+    @Column(name = "date_start_time", nullable = false)
+    var dateStartTime: LocalDateTime,
 
-    @Column(name = "date_end_time")
-    var dateEndTime: LocalDateTime? = null,
+    @Column(name = "date_end_time", nullable = false)
+    var dateEndTime: LocalDateTime,
 
-    @Column(name = "description")
-    var description: String? = null,
+    @Column(name = "description", nullable = false)
+    var description: String,
 
     @Column(name = "max_audience")
     var maxAudience: Int? = null,
 
-    @Column(name = "address")
-    var address: String? = null,
+    @Column(name = "address", nullable = false)
+    var address: String,
 
     @Column(name = "image_url")
     var imageUrl: String? = null,
 
-    @Column(name = "price")
-    var price: Int? = null,
+    @Column(name = "price", nullable = false)
+    var price: Int,
 
     @Column(name = "start_date")
     var startDate: LocalDateTime? = null,
 
 
     @Column(name = "remaining_tickets")
-    var remainingTickets: Int = 0,
+    var remainingTickets: Int?,
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -71,7 +71,7 @@ class PerformanceEntity(
         update.performanceStatus?.let { this.performanceStatus = it }
     }
 
-    fun updateMember(member: MemberEntity?) {
+    fun updateMember(member: MemberEntity) {
         this.member = member
     }
 

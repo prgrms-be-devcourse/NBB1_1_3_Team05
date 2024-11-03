@@ -5,21 +5,21 @@ import com.grepp.somun.performance.dto.domain.PerformanceWithCategory
 import java.time.LocalDateTime
 
 data class PerformanceListResponse(
-    val totalElements: Long,
-    val performanceList: List<PerformanceList>
+    val totalElements: Long = 0,
+    val performanceList: List<PerformanceList> = emptyList()
 ) {
     data class PerformanceList(
-        val memberName: String,
-        val performanceId: Long,
-        val title: String,
-        val dateStartTime: LocalDateTime,
-        val dateEndTime: LocalDateTime,
-        val address: String,
-        val imageUrl: String?,
-        val price: Int,
-        val status: String,
-        val remainingTicket: Int?,
-        val categories: List<CategoryDto>?
+        val memberName: String = "",
+        val performanceId: Long = 0L,
+        val title: String = "",
+        val dateStartTime: LocalDateTime = LocalDateTime.MIN,
+        val dateEndTime: LocalDateTime = LocalDateTime.MIN,
+        val address: String = "",
+        val imageUrl: String? = null,
+        val price: Int = 0,
+        val status: String = "",
+        val remainingTicket: Int? = null,
+        val categories: List<CategoryDto>? = null
     ) {
         companion object {
             fun from(performanceWithCategory: PerformanceWithCategory): PerformanceList {
@@ -33,7 +33,7 @@ data class PerformanceListResponse(
                     dateEndTime = performanceWithCategory.dateEndTime!!,
                     address = performanceWithCategory.address!!,
                     imageUrl = performanceWithCategory.imageUrl,
-                    price = performanceWithCategory.price,
+                    price = performanceWithCategory.price!!,
                     status = performanceWithCategory.status.toString(),
                     remainingTicket = performanceWithCategory.remainingTicket,
                     categories = categoryDtos
@@ -51,4 +51,5 @@ data class PerformanceListResponse(
             )
         }
     }
+
 }

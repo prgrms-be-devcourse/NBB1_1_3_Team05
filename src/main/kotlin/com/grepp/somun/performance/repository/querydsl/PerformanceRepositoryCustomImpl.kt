@@ -186,15 +186,15 @@ class PerformanceRepositoryCustomImpl(
 
             val performance = performanceMap.computeIfAbsent(performanceId!!) {
                 PerformanceWithCategory(
-                    tuple.get(qMember.name),
+                    tuple.get(qMember.name)!!,
                     performanceId,
-                    tuple.get(qPerformanceEntity.title),
-                    tuple.get(qPerformanceEntity.dateStartTime),
-                    tuple.get(qPerformanceEntity.dateEndTime),
-                    tuple.get(qPerformanceEntity.address),
-                    tuple.get(qPerformanceEntity.imageUrl),
+                    tuple.get(qPerformanceEntity.title)!!,
+                    tuple.get(qPerformanceEntity.dateStartTime)!!,
+                    tuple.get(qPerformanceEntity.dateEndTime)!!,
+                    tuple.get(qPerformanceEntity.address)!!,
+                    tuple.get(qPerformanceEntity.imageUrl)!!,
                     tuple.get(qPerformanceEntity.price)!!,
-                    tuple.get(qPerformanceEntity.performanceStatus),
+                    tuple.get(qPerformanceEntity.performanceStatus)!!,
                     tuple.get(qPerformanceEntity.remainingTickets)
                 )
             }
@@ -217,7 +217,7 @@ class PerformanceRepositoryCustomImpl(
 
     override fun getPerformancesByIds(performanceIds: List<Long>): List<PerformanceWithCategory> {
         val performances = jpaQueryFactory
-            .select(
+            .selectDistinct(
                 Projections.constructor(
                     PerformanceWithCategory::class.java,
                     qMember.name.`as`("memberName"),
@@ -234,6 +234,7 @@ class PerformanceRepositoryCustomImpl(
             )
             .from(qPerformanceEntity)
             .leftJoin(qMember).on(qPerformanceEntity.member.eq(qMember))
+            .leftJoin(qPerformanceCategoryEntity).on(qPerformanceCategoryEntity.performance.eq(qPerformanceEntity))
             .where(qPerformanceEntity.performanceId.`in`(performanceIds))
             .fetch()
 

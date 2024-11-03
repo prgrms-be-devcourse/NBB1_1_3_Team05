@@ -1,12 +1,13 @@
 package com.grepp.somun.performance.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.grepp.somun.performance.dto.domain.CategoryContent
 import com.grepp.somun.performance.entity.CategoryEntity
 
 data class CategoryDto(
-    val categoryId: Long?,
-    val nameKr: String?,
-    val nameEn: String?
+    @JsonProperty("id") val categoryId: Long?,
+    @JsonProperty("nameKr") val nameKr: String?,
+    @JsonProperty("nameEn")val nameEn: String?
 ) {
     companion object {
         fun of(categoryId: Long?, nameKr: String?, nameEn: String?): CategoryDto {
