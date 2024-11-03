@@ -40,6 +40,7 @@ enum class ErrorStatus(
     PASSWORD_INVALID(HttpStatus.BAD_REQUEST, "MEMBER400", "비밀번호 형식이 맞지 않습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "해당 유저가 존재하지 않습니다."),
     VERIFICATION_EMAIL_DUPLICATE(HttpStatus.CONFLICT, "EMAIL409", "해당 이메일은 이미 인증에 사용되었습니다."),
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "MEMBER400", "토큰을 찾을 수 없습니다."),
 
     // 소셜 유저 관련 에러
     SOCIAL_EMAIL_DUPLICATE(HttpStatus.CONFLICT, "SOCIAL409", "이메일이 이미 다른 소셜 계정에서 사용중입니다."),
