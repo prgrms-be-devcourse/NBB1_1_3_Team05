@@ -21,6 +21,40 @@ data class PerformanceDetail(
     val updatedAt: LocalDateTime? = null,
     var categories: List<CategoryContent>? = null
 ) {
+    constructor(
+        memberName: String,
+        performanceId: Long,
+        title: String,
+        dateStartTime: LocalDateTime,
+        dateEndTime: LocalDateTime,
+        description: String,
+        maxAudience: Int,
+        address: String,
+        imageUrl: String?,
+        price: Int,
+        remainingTickets: Int?,
+        startDate: LocalDateTime?,
+        status: PerformanceStatus,
+        createdAt: LocalDateTime,
+        updatedAt: LocalDateTime
+    ) : this(
+        memberName,
+        performanceId,
+        title,
+        dateStartTime,
+        dateEndTime,
+        description,
+        maxAudience,
+        address,
+        imageUrl,
+        price,
+        remainingTickets,
+        startDate,
+        status,
+        createdAt,
+        updatedAt,
+        null
+    )
     fun updateCategories(newCategories: List<CategoryContent>?) {
         categories = newCategories
     }
