@@ -37,7 +37,7 @@ class SecurityConfig(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .csrf { it.disable() }
-            .cors { it.disable() }
+            .cors { it.configurationSource(corsConfigurationSource()) }
             .exceptionHandling { exceptionHandling ->
                 exceptionHandling
                     .accessDeniedHandler(jwtAccessDeniedHandler)

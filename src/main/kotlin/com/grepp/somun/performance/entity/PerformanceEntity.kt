@@ -6,78 +6,77 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity(name = "performance")
-@Table(name = "performance")
 class PerformanceEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "performance_id")
     var performanceId: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "member_id")
     var member: MemberEntity? = null,
 
     @Column(name = "title", nullable = false, length = 50)
-    var title: String? = null,
+    var title: String,
 
-    @Column(name = "date_start_time")
-    var dateStartTime: LocalDateTime? = null,
+    @Column(name = "date_start_time", nullable = false)
+    var dateStartTime: LocalDateTime,
 
-    @Column(name = "date_end_time")
-    var dateEndTime: LocalDateTime? = null,
+    @Column(name = "date_end_time", nullable = false)
+    var dateEndTime: LocalDateTime,
 
-    @Column(name = "description")
-    var description: String? = null,
+    @Column(name = "description", nullable = false)
+    var description: String,
 
     @Column(name = "max_audience")
     var maxAudience: Int? = null,
 
-    @Column(name = "address")
-    var address: String? = null,
+    @Column(name = "address", nullable = false)
+    var address: String,
 
     @Column(name = "image_url")
     var imageUrl: String? = null,
 
-    @Column(name = "price")
-    var price: Int? = null,
-
-    @Column(name = "remaining_tickets")
-    var remainingTickets: Int = 0,
+    @Column(name = "price", nullable = false)
+    var price: Int,
 
     @Column(name = "start_date")
     var startDate: LocalDateTime? = null,
+
+
+    @Column(name = "remaining_tickets")
+    var remainingTickets: Int?,
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     var performanceStatus: PerformanceStatus? = null,
 
-) : BaseEntity() {
-    @jakarta.persistence.OneToMany(
+    @OneToMany(
         mappedBy = "performance",
-        cascade = [jakarta.persistence.CascadeType.ALL],
+        cascade = [CascadeType.ALL],
         orphanRemoval = true
     )
-    @lombok.Builder.Default
-    private val performanceCategoryList: List<PerformanceCategoryEntity> = java.util.ArrayList()
+    var performanceCategoryList: MutableList<PerformanceCategoryEntity> = mutableListOf()
+) : BaseEntity() {
 
-    fun updatePerformance(performanceEntity: PerformanceEntity) {
-        performanceEntity.title?.let { this.title = it }
-        performanceEntity.dateStartTime?.let { this.dateStartTime = it }
-        performanceEntity.dateEndTime?.let { this.dateEndTime = it }
-        performanceEntity.description?.let { this.description = it }
-        performanceEntity.address?.let { this.address = it }
-        performanceEntity.imageUrl?.let { this.imageUrl = it }
-        performanceEntity.price?.let { this.price = it }
-        performanceEntity.maxAudience?.let { this.maxAudience = it }
-        performanceEntity.performanceStatus?.let { this.performanceStatus = it }
+    fun updatePerformance(update: PerformanceEntity) {
+        update.title?.let { this.title = it }
+        update.dateStartTime?.let { this.dateStartTime = it }
+        update.dateEndTime?.let { this.dateEndTime = it }
+        update.description?.let { this.description = it }
+        update.address?.let { this.address = it }
+        update.imageUrl?.let { this.imageUrl = it }
+        update.price?.let { this.price = it }
+        update.maxAudience?.let { this.maxAudience = it }
+        update.performanceStatus?.let { this.performanceStatus = it }
     }
 
-    fun updateMember(memberEntity: MemberEntity?) {
-        this.member = memberEntity
+    fun updateMember(member: MemberEntity) {
+        this.member = member
     }
 
     fun updateDeleteAt() {
-        this.recordDeletedAt(LocalDateTime.now())
+        recordDeletedAt(LocalDateTime.now())
     }
 
     fun updateImageUrl(imageUrl: String?) {
