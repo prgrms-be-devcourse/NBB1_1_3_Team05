@@ -49,8 +49,17 @@ class CommentServiceImpl(
             .orElseThrow { GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR) }
 
         val parentId = commentCreateRequest.parentId
-        val parentComment = parentId?.let {
-            commentRepository.findById(it).orElseThrow { GeneralException(ErrorStatus.COMMENT_NOT_FOUND) }
+        log.info("Received parentId: {}", parentId)  // parentId 확인 로그
+
+        val parentComment = if (parentId != null) {
+            commentRepository.findById(parentId).orElseThrow {
+                log.info("Comment with parentId {} not found", parentId)  // parentId로 댓글 조회 실패 시 로그
+                GeneralException(ErrorStatus.COMMENT_NOT_FOUND)
+            }.also {
+                log.info("Successfully retrieved parentComment with id: {}", it.commentId)  // parentComment 조회 성공 시 로그
+            }
+        } else {
+            null
         }
 
         val commentEntity = CommentEntity(
@@ -62,7 +71,6 @@ class CommentServiceImpl(
         )
 
         val savedComment = commentRepository.save(commentEntity)
-        // 저장된 후에 commentId가 생성되므로 null 여부 확인 후 사용
         val commentId = savedComment.commentId ?: throw GeneralException(ErrorStatus.COMMENT_NOT_FOUND)
 
         return CommentCreateResponse.of(
@@ -71,6 +79,7 @@ class CommentServiceImpl(
             savedComment.performance.performanceId ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
         )
     }
+
 
 
     override fun updateComment(commentId: Long, commentUpdateRequest: CommentUpdateRequest): CommentUpdateResponse {
