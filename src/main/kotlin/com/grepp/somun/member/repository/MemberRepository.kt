@@ -13,4 +13,7 @@ interface MemberRepository : JpaRepository<MemberEntity, Long> {
 
     // 이메일로 사용자 조회
     fun findByEmail(email: String): java.util.Optional<MemberEntity>
+
+    // 닉네임으로 사용자 조회
+    fun findByName(email: String): java.util.Optional<MemberEntity>
 }

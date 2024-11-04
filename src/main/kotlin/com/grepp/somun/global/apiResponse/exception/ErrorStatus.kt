@@ -56,6 +56,8 @@ enum class ErrorStatus(
     ERROR_EXECUTING_EMBEDDED_REDIS(HttpStatus.INTERNAL_SERVER_ERROR, "REDISSERVER500", "embedded redis 서버 실행에 실패하였습니다."),
     AVAILABLE_PORT_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "REDISSERVER500", "연결 가능한 port를 찾을 수 없습니다"),
 
+    // 채팅 관련
+    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT404", "채팅방을 찾을 수 없습니다."),
 
     // 멤버 카테고리 관련
     MEMBER_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY404", "해당 카테고리가 존재하지 않습니다."),
