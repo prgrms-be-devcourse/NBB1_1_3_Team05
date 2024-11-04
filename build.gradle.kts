@@ -97,6 +97,9 @@ dependencies {
     // Kotlin-reflect 의존성 추가
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    // Kotlin Socket 추가
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+
 }
 
 kotlin {
