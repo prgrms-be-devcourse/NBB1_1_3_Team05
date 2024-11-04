@@ -3,6 +3,8 @@ package com.grepp.somun.comment.entity
 
 
 import com.grepp.somun.global.entity.BaseEntity
+import com.grepp.somun.member.entity.MemberEntity
+import com.grepp.somun.performance.entity.PerformanceEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.BatchSize
 
@@ -13,7 +15,7 @@ open class CommentEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    val commentId: Long, // id값은 원시형이 아닌 nullable wrapper 사용
+    val commentId: Long? = null, // commentId를 nullable로 설정
 
     @Column(name = "comment", unique = true, nullable = false)
     var content: String,

@@ -1,10 +1,11 @@
 package com.grepp.somun.comment.repository
 
 import com.grepp.somun.comment.entity.CommentEntity
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-import java.awt.print.Pageable
+
 
 interface CommentRepository : JpaRepository<CommentEntity, Long> {
 

@@ -1,7 +1,5 @@
 package com.grepp.somun.comment.service
 
-
-
 import com.grepp.somun.comment.converter.DtoConverter
 import com.grepp.somun.comment.dto.request.CommentCreateRequest
 import com.grepp.somun.comment.dto.request.CommentUpdateRequest
@@ -15,11 +13,10 @@ import com.grepp.somun.comment.repository.CommentRepository
 import com.grepp.somun.global.apiResponse.exception.ErrorStatus
 import com.grepp.somun.global.apiResponse.exception.GeneralException
 import com.grepp.somun.member.repository.MemberRepository
-import org.slf4j.Logger
+import com.grepp.somun.performance.repository.PerformanceRepository
 import org.slf4j.LoggerFactory
-
 import org.springframework.data.domain.Pageable
-
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -30,9 +27,7 @@ class CommentServiceImpl(
     private val performanceRepository: PerformanceRepository
 ) : CommentService {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(CommentServiceImpl::class.java)
-    }
+    private val log = LoggerFactory.getLogger(CommentServiceImpl::class.java)
 
     override fun getAllComment(performanceId: Long, pageable: Pageable): List<CommentReadDto> {
         val commentEntityList = commentRepository.findParentCommentsByPerformanceId(performanceId, pageable)
@@ -67,8 +62,16 @@ class CommentServiceImpl(
         )
 
         val savedComment = commentRepository.save(commentEntity)
-        return CommentCreateResponse.of(savedComment.commentId!!, savedComment.content, savedComment.performance.performanceId)
+        // 저장된 후에 commentId가 생성되므로 null 여부 확인 후 사용
+        val commentId = savedComment.commentId ?: throw GeneralException(ErrorStatus.COMMENT_NOT_FOUND)
+
+        return CommentCreateResponse.of(
+            commentId,  // commentId 전달
+            savedComment.content,
+            savedComment.performance.performanceId ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+        )
     }
+
 
     override fun updateComment(commentId: Long, commentUpdateRequest: CommentUpdateRequest): CommentUpdateResponse {
         val commentEntity = commentRepository.findById(commentId)
@@ -89,7 +92,10 @@ class CommentServiceImpl(
         commentEntity.updateContent(commentUpdateRequest.content)
         commentRepository.save(commentEntity)
 
-        return CommentUpdateResponse.from(commentEntity.performance.performanceId)
+        // Use safe call or ensure the value is not null
+        val performanceId = commentEntity.performance.performanceId ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+
+        return CommentUpdateResponse.from(performanceId)
     }
 
     override fun deleteComment(commentId: Long): CommentDeleteResponse {
@@ -108,6 +114,12 @@ class CommentServiceImpl(
         commentEntity.changeCommentStatus(CommentStatus.DELETED)
         commentRepository.save(commentEntity)
 
-        return CommentDeleteResponse.of(commentEntity.performance.performanceId, commentEntity.commentStatus)
+        // Use safe call or ensure the value is not null
+        val performanceId = commentEntity.performance.performanceId ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+
+        return CommentDeleteResponse.of(
+            performanceId,
+            commentEntity.commentStatus
+        )
     }
 }

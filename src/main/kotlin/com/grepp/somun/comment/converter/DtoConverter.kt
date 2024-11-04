@@ -7,8 +7,8 @@ import com.grepp.somun.comment.entity.CommentEntity
 object DtoConverter {
     fun fromCommentEntity(commentEntity: CommentEntity): CommentReadDto {
         return CommentReadDto(
-            commentId = commentEntity.commentId,
-            memberId = commentEntity.member.memberId, // 실제 멤버 ID
+            commentId = commentEntity.commentId ?: throw IllegalArgumentException("Comment ID cannot be null"),
+            memberId = commentEntity.member.memberId ?: throw IllegalArgumentException("Member ID cannot be null"),
             content = commentEntity.content,
             createdAt = commentEntity.createdAt,
             updatedAt = commentEntity.updatedAt,
