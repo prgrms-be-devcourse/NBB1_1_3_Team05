@@ -15,4 +15,3 @@ interface SocialClient {
     @Throws(JsonProcessingException::class)
     fun getMemberInfo(accessToken: String): SocialMemberCheckDto
 }
-
