@@ -13,6 +13,8 @@ import com.grepp.somun.ticket.dto.response.TicketResponseDto
 import com.grepp.somun.ticket.entity.TicketEntity
 import com.grepp.somun.ticket.repository.TicketRepository
 import jakarta.transaction.Transactional
+import lombok.extern.slf4j.Slf4j
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -25,6 +27,7 @@ import java.time.LocalDateTime
  * @author ycjung
  */
 @Service
+@Slf4j
 class TicketServiceImpl(
     private val memberRepository: MemberRepository,
     private val performanceRepository: PerformanceRepository,
@@ -73,18 +76,47 @@ class TicketServiceImpl(
         return TicketResponseDto.fromEntity(ticketEntity)
     }
 
+    private fun validateTicketAvailability(performanceEntity: PerformanceEntity, ticketRequest: TicketRequestDto) {
+        if ((performanceEntity.remainingTickets ?: 0) < ticketRequest.quantity) {
+            throw GeneralException(ErrorStatus._NOT_ENOUGH_TICKETS)
+        }
+    }
+
     /**
      * 티켓 발권
      */
     @Transactional
     override fun registerTicket(email: String, ticketRequest: TicketRequestDto): TicketResponseDto {
         val memberEntity = findMemberByEmail(email)
-        val performanceEntity = findPerformanceById(ticketRequest.performanceId)
-        val finalPrice = calculateFinalPrice(performanceEntity.price, ticketRequest.quantity, ticketRequest.couponId)
+        // 공연 정보를 performanceId로 조회하고 비관적 락을 설정
+        val performanceEntity = performanceRepository.findByIdWithLock(ticketRequest.performanceId)
+            .orElseThrow { GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND) }
 
-        val ticketEntity = createAndSaveTicket(memberEntity, performanceEntity, ticketRequest.quantity, finalPrice)
+        validateTicketAvailability(performanceEntity, ticketRequest)
+
+        val finalPrice = calculateFinalPrice(
+            performancePrice = performanceEntity.price ?: 0,
+            quantity = ticketRequest.quantity,
+            couponId = ticketRequest.couponId
+        )
+
+        val ticketEntity = createAndSaveTicket(
+            memberEntity = memberEntity,
+            performanceEntity = performanceEntity,
+            quantity = ticketRequest.quantity,
+            finalPrice = finalPrice
+        )
+
+        performanceEntity.updateTicket(calculateRemainTickets(performanceEntity, ticketEntity))
+
         return TicketResponseDto.fromEntity(ticketEntity)
     }
+
+    private fun calculateRemainTickets(performanceEntity: PerformanceEntity, ticketEntity: TicketEntity): Int {
+        return (performanceEntity.remainingTickets ?: 0) - ticketEntity.quantity
+    }
+
+
 
     /**
      * 티켓 취소

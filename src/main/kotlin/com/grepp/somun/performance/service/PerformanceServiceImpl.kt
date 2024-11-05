@@ -1,5 +1,8 @@
 package com.grepp.somun.performance.service
 
+import com.grepp.somun.coupon.dto.response.CouponResponseDto
+import com.grepp.somun.coupon.entity.CouponEntity
+import com.grepp.somun.coupon.repository.CouponRepository
 import com.grepp.somun.global.apiResponse.exception.ErrorStatus
 import com.grepp.somun.global.apiResponse.exception.GeneralException
 import com.grepp.somun.member.repository.MemberRepository
@@ -36,8 +39,31 @@ class PerformanceServiceImpl(
     private val performanceCategoryRepository: PerformanceCategoryRepository,
     private val categoryRepository: CategoryRepository,
     private val memberRepository: MemberRepository,
-    private val imageUploadService: ImageUploadService
+    private val imageUploadService: ImageUploadService,
+    private val couponRepository: CouponRepository
 ) : PerformanceService {
+
+    private val FIRST_COME_COUPON_LIMIT = 3
+
+//    @Transactional
+//    override fun registerPerformance(
+//        email: String,
+//        performanceRegisterRequest: PerformanceRegisterRequest,
+//        imageFile: MultipartFile?
+//    ): PerformanceRegisterResponse {
+//        val memberEntity = memberRepository.findByEmail(email)
+//            .orElseThrow { GeneralException(ErrorStatus.MEMBER_NOT_FOUND) }
+//        val performanceEntity = performanceRegisterRequest.toEntity()
+//        performanceEntity.updateMember(memberEntity)
+//        val imageUrl = imageUploadService.uploadFileToFTP(imageFile)
+//        performanceEntity.updateImageUrl(imageUrl)
+//        performanceRepository.save(performanceEntity)
+//
+//        val categoryEntities = performanceCategorySave(performanceEntity, performanceRegisterRequest.categories)
+//        val categoryDtos = categoryEntities.map { CategoryDto.toDto(it) }
+//
+//        return PerformanceRegisterResponse.of(performanceEntity, categoryDtos)
+//    }
 
     @Transactional
     override fun registerPerformance(
@@ -47,16 +73,37 @@ class PerformanceServiceImpl(
     ): PerformanceRegisterResponse {
         val memberEntity = memberRepository.findByEmail(email)
             .orElseThrow { GeneralException(ErrorStatus.MEMBER_NOT_FOUND) }
-        val performanceEntity = performanceRegisterRequest.toEntity()
+
+        var performanceEntity = performanceRegisterRequest.toEntity()
         performanceEntity.updateMember(memberEntity)
+
         val imageUrl = imageUploadService.uploadFileToFTP(imageFile)
         performanceEntity.updateImageUrl(imageUrl)
-        performanceRepository.save(performanceEntity)
+
+        performanceEntity = performanceRepository.save(performanceEntity)
+
+        // 공연별 선착순 쿠폰 3장 생성
+        if (performanceEntity.maxAudience!! > FIRST_COME_COUPON_LIMIT) {
+            createFirstComeCoupon(performanceEntity)
+        }
 
         val categoryEntities = performanceCategorySave(performanceEntity, performanceRegisterRequest.categories)
         val categoryDtos = categoryEntities.map { CategoryDto.toDto(it) }
 
         return PerformanceRegisterResponse.of(performanceEntity, categoryDtos)
+    }
+
+    private fun createFirstComeCoupon(performanceEntity: PerformanceEntity) {
+        for (i in 1..FIRST_COME_COUPON_LIMIT) {
+            val couponEntity = CouponEntity(
+                name = "선착순 10% 할인 쿠폰 $i",
+                percent = 10,
+                performance = performanceEntity,
+                isUsed = false
+            )
+
+            couponRepository.save(couponEntity)
+        }
     }
 
     override fun getPerformanceList(
@@ -73,14 +120,22 @@ class PerformanceServiceImpl(
     }
 
     override fun getPerformanceDetail(email: String, performanceId: Long): PerformanceDetailResponse {
+        val performance = performanceRepository.findById(performanceId)
+            .orElseThrow { GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND) }
+
+        // 선착순 쿠폰
+        val firstComeCouponDtos = couponRepository.findByPerformance(performance)
+            .map { CouponResponseDto.fromEntity(it) }
+
         val performanceDetail = performanceRepository.getPerformanceDetail(performanceId)
+            ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+
+        performanceDetail.updateFirstComeCoupons(firstComeCouponDtos)
 
         return if (isAccessPerformance(email, performanceId)) {
-            performanceDetail?.let { PerformanceDetailResponse.from(true, it) }
-                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+            PerformanceDetailResponse.from(true, performanceDetail)
         } else {
-            performanceDetail?.let { PerformanceDetailResponse.from(false, it) }
-                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+            PerformanceDetailResponse.from(false, performanceDetail)
         }
     }
 
