@@ -1,5 +1,6 @@
 package com.grepp.somun.performance.dto.response
 
+import com.grepp.somun.coupon.dto.response.CouponResponseDto
 import com.grepp.somun.performance.dto.CategoryDto
 import com.grepp.somun.performance.dto.domain.PerformanceDetail
 import com.grepp.somun.performance.entity.PerformanceStatus
@@ -22,7 +23,8 @@ data class PerformanceDetailResponse(
     val isUpdatable: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val categories: List<CategoryDto>?
+    val categories: List<CategoryDto>?,
+    val firstComeCoupons: List<CouponResponseDto>?
 ) {
     companion object {
         fun from(updatable: Boolean, performanceDetail: PerformanceDetail): PerformanceDetailResponse {
@@ -44,7 +46,8 @@ data class PerformanceDetailResponse(
                 isUpdatable = updatable,
                 createdAt = performanceDetail.createdAt!!,
                 updatedAt = performanceDetail.updatedAt!!,
-                categories = categoryDtos
+                categories = categoryDtos,
+                firstComeCoupons = performanceDetail.firstComeCoupons
             )
         }
     }

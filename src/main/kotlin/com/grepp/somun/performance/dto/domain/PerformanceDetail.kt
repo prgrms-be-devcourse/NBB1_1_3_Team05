@@ -1,5 +1,6 @@
 package com.grepp.somun.performance.dto.domain
 
+import com.grepp.somun.coupon.dto.response.CouponResponseDto
 import com.grepp.somun.performance.entity.PerformanceStatus
 import java.time.LocalDateTime
 
@@ -19,7 +20,8 @@ data class PerformanceDetail(
     val status: PerformanceStatus? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
-    var categories: List<CategoryContent>? = null
+    var categories: List<CategoryContent>? = null,
+    var firstComeCoupons: List<CouponResponseDto>? = null
 ) {
     constructor(
         memberName: String,
@@ -57,5 +59,9 @@ data class PerformanceDetail(
     )
     fun updateCategories(newCategories: List<CategoryContent>?) {
         categories = newCategories
+    }
+
+    fun updateFirstComeCoupons(firstComeCoupons: List<CouponResponseDto>) {
+        this.firstComeCoupons = firstComeCoupons
     }
 }
