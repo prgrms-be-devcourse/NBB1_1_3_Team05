@@ -70,18 +70,6 @@ class PerformanceServiceImpl(
         return PerformanceListResponse.from(performanceList.totalElements, performanceList.content)
     }
 
-//    override fun getPerformanceDetail(email: String, performanceId: Long): PerformanceDetailResponse {
-//        val performanceDetail = performanceRepository.getPerformanceDetail(performanceId)
-//
-//        return if (isAccessPerformance(email, performanceId)) {
-//            performanceDetail?.let { PerformanceDetailResponse.from(true, it) }
-//                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
-//        } else {
-//            performanceDetail?.let { PerformanceDetailResponse.from(false, it) }
-//                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
-//        }
-//    }
-
     override fun getPerformanceDetail(email: String, performanceId: Long): PerformanceDetailResponse {
         val performance = performanceRepository.findById(performanceId)
             .orElseThrow { GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND) }
