@@ -87,6 +87,11 @@ dependencies {
 
     implementation("commons-net:commons-net:3.9.0")
 
+    //공간 정보를 위한 라이브러리
+    implementation ("org.hibernate:hibernate-core:6.4.1.Final")
+    implementation ("org.hibernate:hibernate-spatial:6.4.1.Final")
+    implementation ("org.locationtech.jts:jts-core:1.18.1")
+
     // Redis 의존성 추가
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")

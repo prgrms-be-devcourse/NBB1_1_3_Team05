@@ -3,6 +3,7 @@ package com.grepp.somun.performance.entity
 import com.grepp.somun.global.entity.BaseEntity
 import com.grepp.somun.member.entity.MemberEntity
 import jakarta.persistence.*
+import org.locationtech.jts.geom.Point
 import java.time.LocalDateTime
 
 @Entity(name = "performance")
@@ -43,6 +44,8 @@ class PerformanceEntity(
     @Column(name = "start_date")
     var startDate: LocalDateTime? = null,
 
+    @Column(name = "coordinate", columnDefinition = "GEOMETRY(POINT, 4326)")
+    var coordinate: Point,
 
     @Column(name = "remaining_tickets")
     var remainingTickets: Int?,

@@ -2,9 +2,10 @@ package com.grepp.somun.performance.repository.querydsl
 
 import com.grepp.somun.performance.dto.domain.PerformanceDetail
 import com.grepp.somun.performance.dto.domain.PerformanceWithCategory
+import org.locationtech.jts.geom.Point
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import java.util.Optional
+
 
 interface PerformanceRepositoryCustom {
 
@@ -24,4 +25,6 @@ interface PerformanceRepositoryCustom {
     fun getPerformanceDetail(performanceId: Long): PerformanceDetail?
 
     fun getMyPerformanceWithCategoryList(email: String, pageable: Pageable): Page<PerformanceWithCategory>
+
+    fun getPerformanceAroundPoint(location: Point, radius: Int, pageable: Pageable): Page<PerformanceWithCategory>
 }

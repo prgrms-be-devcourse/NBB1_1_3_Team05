@@ -2,7 +2,6 @@ package com.grepp.somun.performance.service
 
 import com.grepp.somun.global.apiResponse.exception.ErrorStatus
 import com.grepp.somun.global.apiResponse.exception.GeneralException
-import com.grepp.somun.member.entity.MemberEntity
 import com.grepp.somun.member.repository.MemberRepository
 import com.grepp.somun.performance.dto.CategoryDto
 import com.grepp.somun.performance.dto.domain.PerformanceWithCategory
@@ -18,12 +17,18 @@ import com.grepp.somun.performance.entity.PerformanceEntity
 import com.grepp.somun.performance.repository.CategoryRepository
 import com.grepp.somun.performance.repository.PerformanceCategoryRepository
 import com.grepp.somun.performance.repository.PerformanceRepository
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.GeometryFactory
+import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.PrecisionModel
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
-import java.util.stream.Collectors
+
 
 @Service
 class PerformanceServiceImpl(
@@ -157,6 +162,20 @@ class PerformanceServiceImpl(
         val sortedPerformances = performanceIds.mapNotNull { performanceMap[it] }
 
         return PerformanceListResponse.from(sortedPerformances.size.toLong(), sortedPerformances)
+    }
+
+    override fun getAroundPoint(latitude: Double, longitude: Double, page: Int, size: Int): PerformanceListResponse? {
+        val radius = 5000 // 반경 5km 이내 공연 추천
+
+        val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
+        val location: Point = geometryFactory.createPoint(Coordinate(latitude, longitude))
+
+        val pageable: Pageable = PageRequest.of(page, size)
+
+        val performanceList: Page<PerformanceWithCategory> =
+            performanceRepository.getPerformanceAroundPoint(location, radius, pageable)
+
+        return PerformanceListResponse.from(performanceList.getTotalElements(), performanceList.getContent())
     }
 
     private fun isAccessPerformance(email: String?, performanceId: Long): Boolean {

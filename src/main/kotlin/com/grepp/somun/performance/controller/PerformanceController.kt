@@ -178,4 +178,21 @@ class PerformanceController(
         val categories = performanceService.getCategoryList()
         return ApiResponse.onSuccess(categories)
     }
+
+    /**
+     * 특정 지점 주변 공연 리스트를 조회할 수 있다.(최대20개)
+     * @Author Icecoff22
+     * @param latitude 위도
+     * @param longitude 경도
+     * @return PerformanceList
+     */
+    @GetMapping("/around-point")
+    fun getAroundPoint(
+        @RequestParam("latitude") latitude: Double,
+        @RequestParam("longitude") longitude: Double,
+        @RequestParam("page") page: Int,
+        @RequestParam("size") size: Int
+    ): ResponseEntity<ApiResponse<PerformanceListResponse?>> {
+        return ApiResponse.onSuccess(performanceService.getAroundPoint(latitude, longitude, page, size))
+    }
 }

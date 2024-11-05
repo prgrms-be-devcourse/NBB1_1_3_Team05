@@ -9,6 +9,7 @@ import com.grepp.somun.performance.dto.response.PerformanceRegisterResponse
 import com.grepp.somun.performance.dto.response.PerformanceUpdateResponse
 import org.springframework.web.multipart.MultipartFile
 
+
 interface PerformanceService {
     fun registerPerformance(
         email: String,
@@ -41,4 +42,7 @@ interface PerformanceService {
     fun getPerformanceListByUserCategories(email: String): PerformanceListResponse
 
     fun getPopularPerformances(performanceIds: List<Long>): PerformanceListResponse
+
+    fun getAroundPoint(latitude: Double, longitude: Double, page: Int, size: Int): PerformanceListResponse?
+
 }
