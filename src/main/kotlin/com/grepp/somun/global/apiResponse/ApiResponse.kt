@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity
 
 @JsonPropertyOrder("isSuccess", "code", "message", "result")
 data class ApiResponse<T>(
-    @JsonProperty("isSuccess")
+    @get:JsonProperty("isSuccess")
     val isSuccess: Boolean,
     val httpStatus: HttpStatus,
     val code: String,
