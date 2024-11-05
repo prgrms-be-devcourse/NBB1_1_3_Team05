@@ -78,7 +78,11 @@ enum class ErrorStatus(
     _COMMENT_NOT_AUTHORIZED(HttpStatus.FORBIDDEN, "COMMENT403", "댓글 수정 권한이 없습니다. 본인이 작성한 댓글만 수정할 수 있습니다."),
 
     //DB Lock 관련
-    DB_LOCK_FAILURE(HttpStatus.CONFLICT, "DB_LOCK409", "DB 락을 획득하지 못했습니다. 다시 시도해 주세요.");
+    DB_LOCK_FAILURE(HttpStatus.CONFLICT, "DB_LOCK409", "DB 락을 획득하지 못했습니다. 다시 시도해 주세요."),
+
+    //레디스 큐 관련
+    QUEUE_FULL(HttpStatus.BAD_REQUEST, "QUEUE401", "큐가 꽉 찼습니다."),
+    USER_ADDITION_FAILED(HttpStatus.BAD_REQUEST, "QUEUE404", "사용자 추가에 실패하였습니다.");
 
     override fun getResponseWithHttpStatus(): ErrorResponseDto {
         return ErrorResponseDto(httpStatus, false, code, message)

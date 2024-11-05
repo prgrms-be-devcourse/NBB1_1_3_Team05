@@ -57,4 +57,13 @@ class RedisConfig {
 
         return redisTemplate
     }
+
+    @Bean(name = ["queueRedisTemplate"])
+    fun queueRedisTemplate(): RedisTemplate<String, String> {
+        val redisTemplate = RedisTemplate<String, String>()
+        redisTemplate.connectionFactory = redisConnectionFactory()
+        redisTemplate.keySerializer = StringRedisSerializer()
+        redisTemplate.valueSerializer = StringRedisSerializer() // 사용자 ID를 String으로 처리
+        return redisTemplate
+    }
 }
