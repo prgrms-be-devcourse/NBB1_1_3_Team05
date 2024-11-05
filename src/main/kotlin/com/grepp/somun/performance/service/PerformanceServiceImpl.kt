@@ -1,5 +1,7 @@
 package com.grepp.somun.performance.service
 
+import com.grepp.somun.coupon.dto.response.CouponResponseDto
+import com.grepp.somun.coupon.repository.CouponRepository
 import com.grepp.somun.global.apiResponse.exception.ErrorStatus
 import com.grepp.somun.global.apiResponse.exception.GeneralException
 import com.grepp.somun.member.entity.MemberEntity
@@ -31,7 +33,8 @@ class PerformanceServiceImpl(
     private val performanceCategoryRepository: PerformanceCategoryRepository,
     private val categoryRepository: CategoryRepository,
     private val memberRepository: MemberRepository,
-    private val imageUploadService: ImageUploadService
+    private val imageUploadService: ImageUploadService,
+    private val couponRepository: CouponRepository
 ) : PerformanceService {
 
     @Transactional
@@ -67,15 +70,35 @@ class PerformanceServiceImpl(
         return PerformanceListResponse.from(performanceList.totalElements, performanceList.content)
     }
 
+//    override fun getPerformanceDetail(email: String, performanceId: Long): PerformanceDetailResponse {
+//        val performanceDetail = performanceRepository.getPerformanceDetail(performanceId)
+//
+//        return if (isAccessPerformance(email, performanceId)) {
+//            performanceDetail?.let { PerformanceDetailResponse.from(true, it) }
+//                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+//        } else {
+//            performanceDetail?.let { PerformanceDetailResponse.from(false, it) }
+//                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+//        }
+//    }
+
     override fun getPerformanceDetail(email: String, performanceId: Long): PerformanceDetailResponse {
+        val performance = performanceRepository.findById(performanceId)
+            .orElseThrow { GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND) }
+
+        // 선착순 쿠폰
+        val firstComeCouponDtos = couponRepository.findByPerformance(performance)
+            .map { CouponResponseDto.fromEntity(it) }
+
         val performanceDetail = performanceRepository.getPerformanceDetail(performanceId)
+            ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+
+        performanceDetail.updateFirstComeCoupons(firstComeCouponDtos)
 
         return if (isAccessPerformance(email, performanceId)) {
-            performanceDetail?.let { PerformanceDetailResponse.from(true, it) }
-                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+            PerformanceDetailResponse.from(true, performanceDetail)
         } else {
-            performanceDetail?.let { PerformanceDetailResponse.from(false, it) }
-                ?: throw GeneralException(ErrorStatus.PERFORMANCE_NOT_FOUND)
+            PerformanceDetailResponse.from(false, performanceDetail)
         }
     }
 
