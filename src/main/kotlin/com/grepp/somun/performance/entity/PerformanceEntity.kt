@@ -35,6 +35,9 @@ class PerformanceEntity(
     @Column(name = "address", nullable = false)
     var address: String,
 
+    @Column(name = "location")
+    var location: String,
+
     @Column(name = "image_url")
     var imageUrl: String? = null,
 
@@ -61,6 +64,36 @@ class PerformanceEntity(
     )
     var performanceCategoryList: MutableList<PerformanceCategoryEntity> = mutableListOf()
 ) : BaseEntity() {
+
+    constructor(
+        title: String,
+        dateStartTime: LocalDateTime,
+        dateEndTime: LocalDateTime,
+        address: String,
+        imageUrl: String? = null, // 기본값 추가
+        price: Int,
+        remainingTickets: Int? = null, // 기본값 추가
+        description: String,
+        maxAudience: Int? = null, // 기본값 추가
+        status: PerformanceStatus? = null // 기본값 추가
+    ) : this(
+        performanceId = null,
+        member = null,
+        title = title,
+        dateStartTime = dateStartTime,
+        dateEndTime = dateEndTime,
+        description = description,
+        maxAudience = maxAudience,
+        address = address,
+        location = "",
+        imageUrl = imageUrl,
+        price = price,
+        startDate = null,
+        coordinate = Point(null, null),
+        remainingTickets = remainingTickets,
+        performanceStatus = status,
+        performanceCategoryList = mutableListOf()
+    )
 
     fun updatePerformance(update: PerformanceEntity) {
         update.title?.let { this.title = it }

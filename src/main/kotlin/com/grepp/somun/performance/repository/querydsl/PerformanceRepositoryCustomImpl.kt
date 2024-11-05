@@ -263,6 +263,7 @@ class PerformanceRepositoryCustomImpl(
                 qPerformanceEntity.description.`as`("description"),
                 qPerformanceEntity.maxAudience.`as`("maxAudience"),
                 qPerformanceEntity.address.`as`("address"),
+                qPerformanceEntity.location.`as`("location"),
                 qPerformanceEntity.imageUrl.`as`("imageUrl"),
                 qPerformanceEntity.price.`as`("price"),
                 qPerformanceEntity.remainingTickets.`as`("remainingTickets"),
@@ -352,11 +353,10 @@ class PerformanceRepositoryCustomImpl(
         )
             .from(qPerformanceEntity)
             .leftJoin(qMember).on(qPerformanceEntity.member.eq(qMember))
-            .leftJoin(qPerformanceCategoryEntity).on(qPerformanceCategoryEntity.performance.eq(qPerformanceEntity))
             .where(
                 getContainsBooleanExpression(
-                    location!!,
-                    radius!!
+                    location,
+                    radius
                 )
             ) //.orderBy(getOrderSpecifiersByDistance(location))
             .offset(pageable.offset)
@@ -371,8 +371,7 @@ class PerformanceRepositoryCustomImpl(
             .select(qPerformanceEntity.count())
             .from(qPerformanceEntity)
             .leftJoin(qMember).on(qPerformanceEntity.member.eq(qMember))
-            .leftJoin(qPerformanceCategoryEntity).on(qPerformanceCategoryEntity.performance.eq(qPerformanceEntity))
-            .where(getContainsBooleanExpression(location!!, radius!!))
+            .where(getContainsBooleanExpression(location, radius))
             .fetchOne()
 
         if (totalCount == null) {

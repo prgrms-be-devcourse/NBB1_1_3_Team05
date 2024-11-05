@@ -27,7 +27,7 @@ data class PerformanceUpdateRequest(
             remainingTickets = remainTickets,
             description = description,
             maxAudience = maxAudience,
-            performanceStatus = status
+            status = status
         )
     }
 }
